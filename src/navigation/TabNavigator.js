@@ -17,15 +17,15 @@ const TabNavigator = () => {
           if (route.name === 'Capture') {
             iconName = focused ? 'camera' : 'camera-outline';
           } else if (route.name === 'PolesCaptured') {
-            iconName = focused ? 'grid' : 'grid-outline';
+            iconName = focused ? 'flash' : 'flash-outline';
           }
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: colors.primary, // Forest green
+        tabBarActiveTintColor: colors.white, // White for visibility on green
         tabBarInactiveTintColor: colors.secondary, // Beige
         tabBarStyle: {
-          backgroundColor: colors.accent, // Brown
+          backgroundColor: colors.primary, // Green to match top
           borderTopWidth: 0,
         },
         headerStyle: {
@@ -40,7 +40,7 @@ const TabNavigator = () => {
         name="Capture"
         component={CameraScreen}
         options={{
-          title: 'Capture',
+          title: 'Analyze Pole',
         }}
       />
       <Tab.Screen
