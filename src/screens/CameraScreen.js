@@ -15,6 +15,8 @@ import {
 import {colors} from '../theme/colors';
 import {savePhoto} from '../utils/storage';
 import {getCurrentLocation} from '../utils/location';
+import {uploadToR2, generateFilename} from '../utils/r2Upload';
+import {savePoleToDatabase} from '../utils/database';
 
 const CameraScreen = () => {
   const {hasPermission, requestPermission} = useCameraPermission();
@@ -40,24 +42,49 @@ const CameraScreen = () => {
         qualityPrioritization: 'quality',
       });
 
+      console.log('Photo object:', JSON.stringify(photo, null, 2));
+
       // Get GPS coordinates
       const location = await getCurrentLocation();
 
-      // Save photo to /tmp/photos/
+      // Save photo locally as backup
       const savedPath = await savePhoto(photo.path);
+      console.log('Photo saved locally:', savedPath);
 
-      // Log to console
-      const logData = {
-        timestamp: Date.now(),
-        location: location || {latitude: null, longitude: null},
-        filename: savedPath.split('/').pop(),
-      };
-      console.log('Photo captured:', logData);
+      // Generate unique filename
+      const filename = generateFilename();
 
-      Alert.alert('Success', 'Photo captured successfully!');
+      // Upload to R2 - use the saved path instead of photo.path
+      console.log('Uploading to R2...');
+      console.log('Using saved path:', savedPath);
+      const r2Url = await uploadToR2(savedPath, filename);
+
+      // Save to Supabase database
+      console.log('Saving to Supabase...');
+      const savedRecord = await savePoleToDatabase({
+        image_uri: r2Url,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+      });
+
+      // Log the complete data
+      console.log('===== PHOTO CAPTURED =====');
+      console.log('R2 Image URL:', r2Url);
+      console.log('Location:', location);
+      console.log('Database Record:', savedRecord);
+      console.log('Timestamp:', new Date().toISOString());
+      console.log('==========================');
+
+      Alert.alert(
+        'Success',
+        `Photo uploaded!\nStatus: ${savedRecord.status}\nURL: ${r2Url}`,
+      );
     } catch (error) {
       console.error('Error capturing photo:', error);
-      Alert.alert('Error', 'Failed to capture photo');
+      Alert.alert(
+        'Error',
+        `Failed to capture photo: ${error.message || 'Unknown error'}`,
+      );
     } finally {
       setIsCapturing(false);
     }

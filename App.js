@@ -4,6 +4,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import SplashScreen from './src/components/SplashScreen';
 import TabNavigator from './src/navigation/TabNavigator';
 import {initPhotoDirectory} from './src/utils/storage';
+import {testSupabaseConnection} from './src/utils/supabase';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -11,6 +12,9 @@ function App() {
   useEffect(() => {
     // Initialize photo directory on app start
     initPhotoDirectory();
+
+    // Test Supabase connection
+    testSupabaseConnection();
   }, []);
 
   const handleSplashFinish = () => {

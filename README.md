@@ -79,7 +79,36 @@ npm install
 
 This will create the `node_modules/` folder with all required packages.
 
-### 3. Install Ruby Dependencies (Bundler)
+### 3. Configure Environment Variables
+
+Create a `.env` file in the root directory with your Supabase credentials:
+
+```bash
+cp .env.example .env
+```
+
+Or create it manually:
+```bash
+touch .env
+```
+
+Add the following variables to the `.env` file:
+
+```env
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+**How to get these values:**
+
+1. Go to [supabase.com](https://supabase.com) and sign in to your project
+2. Navigate to **Project Settings** → **API**
+3. Copy your **Project URL** (e.g., `https://xxxxx.supabase.co`)
+4. Copy your **anon/public key** (the long JWT token starting with `eyJhbG...`)
+
+> **Important**: The `.env` file is already in `.gitignore` and will not be committed to Git. Never share your Supabase keys publicly!
+
+### 4. Install Ruby Dependencies (Bundler)
 
 Install the Ruby gems needed for CocoaPods:
 
@@ -89,7 +118,7 @@ bundle install
 
 This installs CocoaPods and other Ruby dependencies specified in the `Gemfile`.
 
-### 4. Install iOS Dependencies (CocoaPods)
+### 5. Install iOS Dependencies (CocoaPods)
 
 Navigate to the iOS directory and install native iOS dependencies:
 
@@ -106,7 +135,7 @@ This will:
 
 > **Note**: Always use `PoleBrothers.xcworkspace` (not `.xcodeproj`) when opening in Xcode.
 
-### 5. Verify Installation
+### 6. Verify Installation
 
 Check that Xcode can find the iOS SDK:
 
@@ -124,6 +153,53 @@ If you see an error about Xcode not being found, run:
 ```bash
 sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
 ```
+
+---
+
+## Database Setup
+
+Before running the app, you need to create the database table in Supabase:
+
+### 1. Create the `PolesCaptured` Table
+
+1. Go to your Supabase Dashboard
+2. Navigate to the **SQL Editor**
+3. Run the following SQL:
+
+```sql
+CREATE TABLE public."PolesCaptured" (
+  taker_id text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  latitude double precision NOT NULL,
+  longitude double precision NULL,
+  image_uri text NULL,
+  status text NULL,
+  lower_confidence double precision NULL,
+  upper_confidence double precision NULL,
+  normal_pole boolean NULL,
+  leaning_pole boolean NULL,
+  warped_pole boolean NULL,
+  vegetation_pole boolean NULL,
+  cracked_pole boolean NULL,
+  CONSTRAINT PolesCaptured_pkey PRIMARY KEY (taker_id, created_at)
+) TABLESPACE pg_default;
+
+-- Enable Row Level Security
+ALTER TABLE public."PolesCaptured" ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow all operations (adjust for production)
+CREATE POLICY "Allow all operations" ON public."PolesCaptured"
+  FOR ALL USING (true);
+```
+
+### 2. Verify Connection
+
+When you run the app, check the console logs. You should see:
+```
+Supabase connected successfully!
+```
+
+If you see connection errors, verify your `.env` file has the correct credentials.
 
 ---
 

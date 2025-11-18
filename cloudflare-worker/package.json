@@ -1,0 +1,17 @@
+{
+  "name": "pole-brothers-r2-worker",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker for generating R2 presigned URLs",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "aws4fetch": "^1.0.20"
+  },
+  "devDependencies": {
+    "wrangler": "^4.47.0"
+  }
+}

@@ -1,16 +1,16 @@
-import React from 'react';
-import {View, Image, Text, StyleSheet} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Linking, TouchableOpacity, Platform, Image} from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {colors} from '../theme/colors';
 import {fontSize, borderRadius, padding} from '../theme/styles';
-import {formatLocation} from '../utils/location';
 
 const PhotoCard = ({
   image,
-  confidenceInterval = 95,
+  status,
   timestamp,
-  status = 'Healthy Pole',
   location,
+  upperConfidence,
+  lowerConfidence,
 }) => {
   // Format timestamp to readable date
   const formatTimestamp = (date) => {
@@ -26,24 +26,94 @@ const PhotoCard = ({
     return d.toLocaleString('en-US', options);
   };
 
+  // Format confidence interval
+  const formatConfidence = () => {
+    if (upperConfidence === null || upperConfidence === undefined ||
+        lowerConfidence === null || lowerConfidence === undefined) {
+      return 'No confidence data';
+    }
+    return `${lowerConfidence} to ${upperConfidence} confidence`;
+  };
+
+  // Open location in maps
+  const openInMaps = () => {
+    if (!location || !location.latitude || !location.longitude) {
+      return;
+    }
+
+    const {latitude, longitude} = location;
+    const label = 'Pole Location';
+
+    const url = Platform.select({
+      ios: `maps:0,0?q=${label}@${latitude},${longitude}`,
+      android: `geo:0,0?q=${latitude},${longitude}(${label})`,
+    });
+
+    Linking.openURL(url).catch(err => {
+      console.error('Error opening maps:', err);
+      // Fallback to Google Maps web
+      Linking.openURL(
+        `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`,
+      );
+    });
+  };
+
+  // Determine status color (green for Normal, red for others)
+  const statusColor = status === 'Normal' ? colors.statusGreen : '#DC143C'; // Crimson red
+
+  // Format location for display
+  const formatLocation = () => {
+    if (!location || !location.latitude || !location.longitude) {
+      return 'Location unavailable';
+    }
+    const lat = location.latitude.toFixed(3);
+    const lon = location.longitude.toFixed(3);
+    return `${lat}, ${lon}`;
+  };
+
+  const [imageError, setImageError] = useState(false);
+
+  // Debug: Log image URL
+  console.log('PhotoCard image URL:', image);
+  console.log('Image URL type:', typeof image);
+  console.log('Image URL length:', image?.length);
+
   return (
     <View style={styles.card}>
-      <FastImage
-        source={{uri: `file://${image}`}}
+      {/* Using standard Image component for debugging - better error messages */}
+      <Image
+        source={{uri: image}}
         style={styles.thumbnail}
-        resizeMode={FastImage.resizeMode.cover}
+        resizeMode="cover"
+        onLoadStart={() => {
+          console.log('✓ Image loading started:', image);
+          setImageError(false);
+        }}
+        onLoad={(event) => {
+          console.log('✓ Image loaded successfully:', image);
+          console.log('Image dimensions:', event.nativeEvent.source);
+        }}
+        onError={(error) => {
+          console.error('✗ Image load error for URL:', image);
+          console.error('Error nativeEvent:', error?.nativeEvent);
+          console.error('Error message:', error?.nativeEvent?.error);
+          setImageError(true);
+        }}
       />
+      {imageError && (
+        <View style={styles.errorOverlay}>
+          <Text style={styles.errorText}>Failed to load</Text>
+        </View>
+      )}
       <View style={styles.contentArea}>
-        <Text style={styles.statusText}>{status}</Text>
-        <Text style={styles.detailText}>
-          {confidenceInterval}% confidence
-        </Text>
-        <Text style={styles.detailText}>
-          {formatTimestamp(timestamp)}
-        </Text>
-        <Text style={styles.detailText}>
-          {formatLocation(location)}
-        </Text>
+        <Text style={[styles.statusText, {color: statusColor}]}>{status}</Text>
+        <Text style={styles.detailText}>{formatConfidence()}</Text>
+        <Text style={styles.detailText}>{formatTimestamp(timestamp)}</Text>
+        <TouchableOpacity onPress={openInMaps} disabled={!location?.latitude}>
+          <Text style={[styles.detailText, styles.linkText]}>
+            {formatLocation()}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -73,6 +143,22 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 4,
+    backgroundColor: colors.gray, // Placeholder while loading
+  },
+  errorOverlay: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    backgroundColor: 'rgba(255, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+  },
+  errorText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   contentArea: {
     flex: 1,
@@ -82,12 +168,15 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: fontSize.large,
     fontWeight: 'bold',
-    color: colors.statusGreen, // Green for "Healthy Pole"
   },
   detailText: {
     fontSize: fontSize.small,
     color: colors.black,
     marginTop: 2,
+  },
+  linkText: {
+    color: '#007AFF', // iOS blue
+    textDecorationLine: 'underline',
   },
 });
 
