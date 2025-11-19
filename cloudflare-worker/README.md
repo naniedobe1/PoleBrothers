@@ -29,26 +29,31 @@ npm install
 
 ### 4. Configure Environment Variables
 
-Set these secrets using Wrangler (they won't be visible in the code):
+**IMPORTANT:** Keep your actual secret values in a secure password manager!
+
+Set these secrets using Wrangler:
 
 ```bash
-wrangler secret put R2_ACCESS_KEY_ID
-# Paste: 90b54eba183c0ae862aecb95848999ca
+npx wrangler secret put R2_ACCESS_KEY_ID
+# Enter your R2 Access Key ID when prompted
 
-wrangler secret put R2_SECRET_ACCESS_KEY
-# Paste: ee3dee45dca3ac25f80e88abe67906261676a8697f725166d52e1ea57b94b8b9
+npx wrangler secret put R2_SECRET_ACCESS_KEY
+# Enter your R2 Secret Access Key when prompted
 
-wrangler secret put R2_ACCOUNT_ID
-# Paste: 53b4b7104287c4b4d1c76fd9a2f52876
+npx wrangler secret put R2_ACCOUNT_ID
+# Enter your Cloudflare Account ID when prompted
 
-wrangler secret put R2_BUCKET_NAME
-# Paste: pole-brothers-app
+npx wrangler secret put R2_BUCKET_NAME
+# Enter: pole-brothers-app (or your bucket name)
 
-wrangler secret put R2_PUBLIC_URL
-# This is the URL where your images will be accessible
-# Format: https://pub-[hash].r2.dev OR your custom domain
-# For now, use: https://53b4b7104287c4b4d1c76fd9a2f52876.r2.cloudflarestorage.com/pole-brothers-app
+npx wrangler secret put R2_PUBLIC_URL
+# Enter your public R2.dev URL: https://pub-[hash].r2.dev
 ```
+
+**Where to find these values:**
+- R2 credentials: Cloudflare Dashboard → R2 → Manage R2 API Tokens
+- Account ID: Cloudflare Dashboard → Workers & Pages → right sidebar
+- Public URL: R2 Dashboard → Your Bucket → Settings → Public R2.dev subdomain
 
 ### 5. Enable Public Access (If Needed)
 
@@ -109,6 +114,19 @@ Expected response:
 
 ## Troubleshooting
 
+**500 Error with no response body?**
+- Worker dependency is missing or deployment failed
+- **Fix:** Run `npm install && npm run deploy` from the cloudflare-worker directory
+
+**500 Error with JSON error message?**
+- One or more environment variables are missing
+- **Fix:** Re-run all `npx wrangler secret put` commands (see section 4)
+
+**Worker stops working randomly?**
+- Secrets may have been cleared (rare but possible)
+- **Prevention:** Keep backup of all secret values in a password manager
+- **Fix:** Re-deploy and re-set secrets
+
 **CORS errors?**
 - The worker includes CORS headers for all origins
 - Check browser console for specific errors
@@ -120,4 +138,12 @@ Expected response:
 
 **Images not accessible?**
 - Enable public access on your R2 bucket
-- Or set up a custom domain
+- Verify R2_PUBLIC_URL is set to the correct public domain
+
+## Preventing Future Issues
+
+1. **Always deploy via CLI, never edit in Cloudflare dashboard**
+2. **Keep a backup of all secrets in a password manager**
+3. **Don't commit actual secrets to git** (keep them in .env locally only)
+4. **Test after deployment:** `npm run deploy && curl -X POST [worker-url] ...`
+5. **Set up monitoring/alerts** in Cloudflare to detect worker failures

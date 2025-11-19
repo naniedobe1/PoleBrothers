@@ -3,6 +3,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CameraScreen from '../screens/CameraScreen';
 import PolesCapturedScreen from '../screens/PolesCapturedScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import {colors} from '../theme/colors';
 
 const Tab = createBottomTabNavigator();
@@ -18,6 +19,8 @@ const TabNavigator = () => {
             iconName = focused ? 'camera' : 'camera-outline';
           } else if (route.name === 'PolesCaptured') {
             iconName = focused ? 'flash' : 'flash-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person' : 'person-outline';
           }
 
           return <Icon name={iconName} size={size} color={color} />;
@@ -48,6 +51,13 @@ const TabNavigator = () => {
         component={PolesCapturedScreen}
         options={{
           title: 'Poles Captured',
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          title: 'Profile',
         }}
       />
     </Tab.Navigator>

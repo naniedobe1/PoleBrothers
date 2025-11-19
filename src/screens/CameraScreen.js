@@ -16,7 +16,7 @@ import {colors} from '../theme/colors';
 import {savePhoto} from '../utils/storage';
 import {getCurrentLocation} from '../utils/location';
 import {uploadToR2, generateFilename} from '../utils/r2Upload';
-import {savePoleToDatabase} from '../utils/database';
+import {savePoleToDatabase, fetchOrCreateUserData} from '../utils/database';
 
 const CameraScreen = () => {
   const {hasPermission, requestPermission} = useCameraPermission();
@@ -36,6 +36,10 @@ const CameraScreen = () => {
 
     try {
       setIsCapturing(true);
+
+      // Ensure user_data exists (creates if it doesn't)
+      console.log('Ensuring user data exists...');
+      await fetchOrCreateUserData();
 
       // Take photo
       const photo = await camera.current.takePhoto({

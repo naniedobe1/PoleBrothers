@@ -236,3 +236,125 @@ export const deletePoleFromDatabase = async (takerId, createdAt) => {
     return false;
   }
 };
+
+/**
+ * Generate a random 16-character alphanumeric string
+ * @returns {string} - Random 16-character string
+ */
+export const generateRandomUsername = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 16; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+/**
+ * Fetch or create user data for the current device
+ * @returns {Promise<object>} - Returns user data object {taker_id, taker_name, profile_pic_url}
+ */
+export const fetchOrCreateUserData = async () => {
+  try {
+    const deviceId = await getDeviceId();
+    console.log(`Fetching user data for device: ${deviceId}`);
+
+    const {data, error} = await supabase
+      .from('user_data')
+      .select('*')
+      .eq('taker_id', deviceId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error fetching user data:', error);
+      throw error;
+    }
+
+    if (data) {
+      console.log('User data found:', data);
+      return data;
+    }
+
+    console.log('No user data found, creating new user...');
+    const randomUsername = generateRandomUsername();
+
+    const {data: newData, error: insertError} = await supabase
+      .from('user_data')
+      .insert([
+        {
+          taker_id: deviceId,
+          taker_name: randomUsername,
+          profile_pic_url: null,
+        },
+      ])
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Error creating user data:', insertError);
+      throw insertError;
+    }
+
+    console.log('User data created:', newData);
+    return newData;
+  } catch (error) {
+    console.error('Error in fetchOrCreateUserData:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update username for the current device
+ * @param {string} newUsername - New username to set
+ * @returns {Promise<boolean>} - Returns true if successful
+ */
+export const updateUsername = async (newUsername) => {
+  try {
+    const deviceId = await getDeviceId();
+    console.log(`Updating username for device: ${deviceId} to: ${newUsername}`);
+
+    const {error} = await supabase
+      .from('user_data')
+      .update({taker_name: newUsername})
+      .eq('taker_id', deviceId);
+
+    if (error) {
+      console.error('Error updating username:', error);
+      throw error;
+    }
+
+    console.log('Username updated successfully');
+    return true;
+  } catch (error) {
+    console.error('Error in updateUsername:', error);
+    return false;
+  }
+};
+
+/**
+ * Update profile picture URL for the current device
+ * @param {string} profilePicUrl - New profile picture URL (R2 URL)
+ * @returns {Promise<boolean>} - Returns true if successful
+ */
+export const updateProfilePicture = async (profilePicUrl) => {
+  try {
+    const deviceId = await getDeviceId();
+    console.log(`Updating profile picture for device: ${deviceId}`);
+
+    const {error} = await supabase
+      .from('user_data')
+      .update({profile_pic_url: profilePicUrl})
+      .eq('taker_id', deviceId);
+
+    if (error) {
+      console.error('Error updating profile picture:', error);
+      throw error;
+    }
+
+    console.log('Profile picture updated successfully');
+    return true;
+  } catch (error) {
+    console.error('Error in updateProfilePicture:', error);
+    return false;
+  }
+};
