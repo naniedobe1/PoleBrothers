@@ -2,7 +2,7 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CameraScreen from '../screens/CameraScreen';
-import PolesCapturedScreen from '../screens/PolesCapturedScreen';
+import PolesCapturedStack from './PolesCapturedStack';
 import ProfileScreen from '../screens/ProfileScreen';
 import {colors} from '../theme/colors';
 
@@ -48,9 +48,10 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="PolesCaptured"
-        component={PolesCapturedScreen}
+        component={PolesCapturedStack}
         options={{
           title: 'Poles Captured',
+          headerShown: false,
         }}
       />
       <Tab.Screen

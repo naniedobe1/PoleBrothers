@@ -25,7 +25,7 @@ const SORT_OPTIONS = {
 
 const STATUS_OPTIONS = ['Normal', 'Vegetation', 'Warped', 'Cracked', 'Leaning'];
 
-const PolesCapturedScreen = () => {
+const PolesCapturedScreen = ({navigation}) => {
   const [photos, setPhotos] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -129,17 +129,21 @@ const PolesCapturedScreen = () => {
 
   const renderPhotoCard = ({item}) => {
     return (
-      <PhotoCard
-        image={item.image_uri}
-        status={item.status}
-        timestamp={item.created_at}
-        location={{
-          latitude: item.latitude,
-          longitude: item.longitude,
-        }}
-        upperConfidence={item.upper_confidence}
-        lowerConfidence={item.lower_confidence}
-      />
+      <TouchableOpacity
+        onPress={() => navigation.navigate('PoleDetail', {pole: item})}
+        activeOpacity={0.7}>
+        <PhotoCard
+          image={item.image_uri}
+          status={item.status}
+          timestamp={item.created_at}
+          location={{
+            latitude: item.latitude,
+            longitude: item.longitude,
+          }}
+          upperConfidence={item.upper_confidence}
+          lowerConfidence={item.lower_confidence}
+        />
+      </TouchableOpacity>
     );
   };
 

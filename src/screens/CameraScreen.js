@@ -81,7 +81,7 @@ const CameraScreen = () => {
 
       Alert.alert(
         'Success',
-        `Photo uploaded!\nStatus: ${savedRecord.status}\nURL: ${r2Url}`,
+        `Pole Successfully Captured. Status: ${savedRecord.status}`,
       );
     } catch (error) {
       console.error('Error capturing photo:', error);

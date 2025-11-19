@@ -212,17 +212,15 @@ export const fetchPolesFromDatabase = async (
 
 /**
  * Delete a pole record from Supabase
- * @param {string} takerId - taker_id (device ID)
- * @param {string} createdAt - created_at timestamp
+ * @param {string} imageUri - image_uri (unique identifier)
  * @returns {Promise<boolean>} - Returns true if successful
  */
-export const deletePoleFromDatabase = async (takerId, createdAt) => {
+export const deletePoleFromDatabase = async (imageUri) => {
   try {
     const {error} = await supabase
       .from('PolesCaptured')
       .delete()
-      .eq('taker_id', takerId)
-      .eq('created_at', createdAt);
+      .eq('image_uri', imageUri);
 
     if (error) {
       console.error('Error deleting pole:', error);
