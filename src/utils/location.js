@@ -1,5 +1,6 @@
 import Geolocation from 'react-native-geolocation-service';
 import {PermissionsAndroid, Platform} from 'react-native';
+import Logger from './logger';
 
 /**
  * Request location permission (iOS and Android)
@@ -27,7 +28,7 @@ export const requestLocationPermission = async () => {
     }
     return false;
   } catch (error) {
-    console.error('Error requesting location permission:', error);
+    Logger.error('Error requesting location permission:', error);
     return false;
   }
 };
@@ -40,7 +41,7 @@ export const getCurrentLocation = async () => {
   try {
     const hasPermission = await requestLocationPermission();
     if (!hasPermission) {
-      console.warn('Location permission not granted');
+      Logger.warn('Location permission not granted');
       return null;
     }
 
@@ -51,7 +52,7 @@ export const getCurrentLocation = async () => {
           resolve({latitude, longitude});
         },
         error => {
-          console.error('Error getting location:', error);
+          Logger.error('Error getting location:', error);
           resolve(null);
         },
         {
@@ -62,7 +63,7 @@ export const getCurrentLocation = async () => {
       );
     });
   } catch (error) {
-    console.error('Error in getCurrentLocation:', error);
+    Logger.error('Error in getCurrentLocation:', error);
     return null;
   }
 };

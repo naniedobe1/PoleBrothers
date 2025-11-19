@@ -3,6 +3,7 @@ import {View, Text, StyleSheet, Linking, TouchableOpacity, Platform, Image} from
 import FastImage from 'react-native-fast-image';
 import {colors} from '../theme/colors';
 import {fontSize, borderRadius, padding} from '../theme/styles';
+import Logger from '../utils/logger';
 
 const PhotoCard = ({
   image,
@@ -50,7 +51,7 @@ const PhotoCard = ({
     });
 
     Linking.openURL(url).catch(err => {
-      console.error('Error opening maps:', err);
+      Logger.error('Error opening maps:', err);
       // Fallback to Google Maps web
       Linking.openURL(
         `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`,
@@ -74,9 +75,9 @@ const PhotoCard = ({
   const [imageError, setImageError] = useState(false);
 
   // Debug: Log image URL
-  console.log('PhotoCard image URL:', image);
-  console.log('Image URL type:', typeof image);
-  console.log('Image URL length:', image?.length);
+  Logger.log('PhotoCard image URL:', image);
+  Logger.log('Image URL type:', typeof image);
+  Logger.log('Image URL length:', image?.length);
 
   return (
     <View style={styles.card}>
@@ -86,17 +87,17 @@ const PhotoCard = ({
         style={styles.thumbnail}
         resizeMode="cover"
         onLoadStart={() => {
-          console.log('✓ Image loading started:', image);
+          Logger.log('✓ Image loading started:', image);
           setImageError(false);
         }}
         onLoad={(event) => {
-          console.log('✓ Image loaded successfully:', image);
-          console.log('Image dimensions:', event.nativeEvent.source);
+          Logger.log('✓ Image loaded successfully:', image);
+          Logger.log('Image dimensions:', event.nativeEvent.source);
         }}
         onError={(error) => {
-          console.error('✗ Image load error for URL:', image);
-          console.error('Error nativeEvent:', error?.nativeEvent);
-          console.error('Error message:', error?.nativeEvent?.error);
+          Logger.error('✗ Image load error for URL:', image);
+          Logger.error('Error nativeEvent:', error?.nativeEvent);
+          Logger.error('Error message:', error?.nativeEvent?.error);
           setImageError(true);
         }}
       />

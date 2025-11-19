@@ -1,5 +1,6 @@
 import {supabase} from './supabase';
 import DeviceInfo from 'react-native-device-info';
+import Logger from './logger';
 
 /**
  * Get device identifier for vendor (iOS) or unique ID (Android)
@@ -10,7 +11,7 @@ export const getDeviceId = async () => {
     const deviceId = await DeviceInfo.getUniqueId();
     return deviceId;
   } catch (error) {
-    console.error('Error getting device ID:', error);
+    Logger.error('Error getting device ID:', error);
     return 'unknown-device';
   }
 };
@@ -87,7 +88,7 @@ export const savePoleToDatabase = async (poleData) => {
       ...booleanFields,
     };
 
-    console.log('Saving to PolesCaptured:', record);
+    Logger.log('Saving to PolesCaptured:', record);
 
     const {data, error} = await supabase
       .from('PolesCaptured')
@@ -96,14 +97,14 @@ export const savePoleToDatabase = async (poleData) => {
       .single();
 
     if (error) {
-      console.error('Error saving to database:', error);
+      Logger.error('Error saving to database:', error);
       throw error;
     }
 
-    console.log('Pole saved to database successfully:', data);
+    Logger.log('Pole saved to database successfully:', data);
     return data;
   } catch (error) {
-    console.error('Error in savePoleToDatabase:', error);
+    Logger.error('Error in savePoleToDatabase:', error);
     throw error;
   }
 };
@@ -148,7 +149,7 @@ export const fetchPolesFromDatabase = async (
 ) => {
   try {
     const deviceId = await getDeviceId();
-    console.log(
+    Logger.log(
       `Fetching poles for device: ${deviceId}, limit: ${limit}, offset: ${offset}, sortBy: ${sortBy}, statusFilter: ${statusFilter?.join(', ')}`,
     );
 
@@ -178,7 +179,7 @@ export const fetchPolesFromDatabase = async (
     const {data, error} = await query;
 
     if (error) {
-      console.error('Error fetching poles:', error);
+      Logger.error('Error fetching poles:', error);
       throw error;
     }
 
@@ -202,10 +203,10 @@ export const fetchPolesFromDatabase = async (
       });
     }
 
-    console.log(`Fetched ${data?.length || 0} poles from database`);
+    Logger.log(`Fetched ${data?.length || 0} poles from database`);
     return data || [];
   } catch (error) {
-    console.error('Error in fetchPolesFromDatabase:', error);
+    Logger.error('Error in fetchPolesFromDatabase:', error);
     return [];
   }
 };
@@ -223,14 +224,14 @@ export const deletePoleFromDatabase = async (imageUri) => {
       .eq('image_uri', imageUri);
 
     if (error) {
-      console.error('Error deleting pole:', error);
+      Logger.error('Error deleting pole:', error);
       throw error;
     }
 
-    console.log('Pole deleted from database');
+    Logger.log('Pole deleted from database');
     return true;
   } catch (error) {
-    console.error('Error in deletePoleFromDatabase:', error);
+    Logger.error('Error in deletePoleFromDatabase:', error);
     return false;
   }
 };
@@ -255,7 +256,7 @@ export const generateRandomUsername = () => {
 export const fetchOrCreateUserData = async () => {
   try {
     const deviceId = await getDeviceId();
-    console.log(`Fetching user data for device: ${deviceId}`);
+    Logger.log(`Fetching user data for device: ${deviceId}`);
 
     const {data, error} = await supabase
       .from('user_data')
@@ -264,16 +265,16 @@ export const fetchOrCreateUserData = async () => {
       .maybeSingle();
 
     if (error) {
-      console.error('Error fetching user data:', error);
+      Logger.error('Error fetching user data:', error);
       throw error;
     }
 
     if (data) {
-      console.log('User data found:', data);
+      Logger.log('User data found:', data);
       return data;
     }
 
-    console.log('No user data found, creating new user...');
+    Logger.log('No user data found, creating new user...');
     const randomUsername = generateRandomUsername();
 
     const {data: newData, error: insertError} = await supabase
@@ -289,14 +290,14 @@ export const fetchOrCreateUserData = async () => {
       .single();
 
     if (insertError) {
-      console.error('Error creating user data:', insertError);
+      Logger.error('Error creating user data:', insertError);
       throw insertError;
     }
 
-    console.log('User data created:', newData);
+    Logger.log('User data created:', newData);
     return newData;
   } catch (error) {
-    console.error('Error in fetchOrCreateUserData:', error);
+    Logger.error('Error in fetchOrCreateUserData:', error);
     throw error;
   }
 };
@@ -309,7 +310,7 @@ export const fetchOrCreateUserData = async () => {
 export const updateUsername = async (newUsername) => {
   try {
     const deviceId = await getDeviceId();
-    console.log(`Updating username for device: ${deviceId} to: ${newUsername}`);
+    Logger.log(`Updating username for device: ${deviceId} to: ${newUsername}`);
 
     const {error} = await supabase
       .from('user_data')
@@ -317,14 +318,14 @@ export const updateUsername = async (newUsername) => {
       .eq('taker_id', deviceId);
 
     if (error) {
-      console.error('Error updating username:', error);
+      Logger.error('Error updating username:', error);
       throw error;
     }
 
-    console.log('Username updated successfully');
+    Logger.log('Username updated successfully');
     return true;
   } catch (error) {
-    console.error('Error in updateUsername:', error);
+    Logger.error('Error in updateUsername:', error);
     return false;
   }
 };
@@ -337,7 +338,7 @@ export const updateUsername = async (newUsername) => {
 export const updateProfilePicture = async (profilePicUrl) => {
   try {
     const deviceId = await getDeviceId();
-    console.log(`Updating profile picture for device: ${deviceId}`);
+    Logger.log(`Updating profile picture for device: ${deviceId}`);
 
     const {error} = await supabase
       .from('user_data')
@@ -345,14 +346,14 @@ export const updateProfilePicture = async (profilePicUrl) => {
       .eq('taker_id', deviceId);
 
     if (error) {
-      console.error('Error updating profile picture:', error);
+      Logger.error('Error updating profile picture:', error);
       throw error;
     }
 
-    console.log('Profile picture updated successfully');
+    Logger.log('Profile picture updated successfully');
     return true;
   } catch (error) {
-    console.error('Error in updateProfilePicture:', error);
+    Logger.error('Error in updateProfilePicture:', error);
     return false;
   }
 };

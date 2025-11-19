@@ -37,8 +37,6 @@
 	<string>PoleBrothers needs access to your camera to capture pole photos.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>PoleBrothers needs access to your location to tag photos with GPS coordinates.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>PoleBrothers needs access to your microphone for video recording features.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>PoleBrothers needs access to save captured photos to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

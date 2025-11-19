@@ -17,6 +17,7 @@ import {savePhoto} from '../utils/storage';
 import {getCurrentLocation} from '../utils/location';
 import {uploadToR2, generateFilename} from '../utils/r2Upload';
 import {savePoleToDatabase, fetchOrCreateUserData} from '../utils/database';
+import Logger from '../utils/logger';
 
 const CameraScreen = () => {
   const {hasPermission, requestPermission} = useCameraPermission();
@@ -38,7 +39,7 @@ const CameraScreen = () => {
       setIsCapturing(true);
 
       // Ensure user_data exists (creates if it doesn't)
-      console.log('Ensuring user data exists...');
+      Logger.log('Ensuring user data exists...');
       await fetchOrCreateUserData();
 
       // Take photo
@@ -46,25 +47,25 @@ const CameraScreen = () => {
         qualityPrioritization: 'quality',
       });
 
-      console.log('Photo object:', JSON.stringify(photo, null, 2));
+      Logger.log('Photo object:', JSON.stringify(photo, null, 2));
 
       // Get GPS coordinates
       const location = await getCurrentLocation();
 
       // Save photo locally as backup
       const savedPath = await savePhoto(photo.path);
-      console.log('Photo saved locally:', savedPath);
+      Logger.log('Photo saved locally:', savedPath);
 
       // Generate unique filename
       const filename = generateFilename();
 
       // Upload to R2 - use the saved path instead of photo.path
-      console.log('Uploading to R2...');
-      console.log('Using saved path:', savedPath);
+      Logger.log('Uploading to R2...');
+      Logger.log('Using saved path:', savedPath);
       const r2Url = await uploadToR2(savedPath, filename);
 
       // Save to Supabase database
-      console.log('Saving to Supabase...');
+      Logger.log('Saving to Supabase...');
       const savedRecord = await savePoleToDatabase({
         image_uri: r2Url,
         latitude: location?.latitude,
@@ -72,19 +73,19 @@ const CameraScreen = () => {
       });
 
       // Log the complete data
-      console.log('===== PHOTO CAPTURED =====');
-      console.log('R2 Image URL:', r2Url);
-      console.log('Location:', location);
-      console.log('Database Record:', savedRecord);
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('==========================');
+      Logger.log('===== PHOTO CAPTURED =====');
+      Logger.log('R2 Image URL:', r2Url);
+      Logger.log('Location:', location);
+      Logger.log('Database Record:', savedRecord);
+      Logger.log('Timestamp:', new Date().toISOString());
+      Logger.log('==========================');
 
       Alert.alert(
         'Success',
         `Pole Successfully Captured. Status: ${savedRecord.status}`,
       );
     } catch (error) {
-      console.error('Error capturing photo:', error);
+      Logger.error('Error capturing photo:', error);
       Alert.alert(
         'Error',
         `Failed to capture photo: ${error.message || 'Unknown error'}`,

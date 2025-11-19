@@ -16,6 +16,7 @@ import {fetchPolesFromDatabase, getDeviceId} from '../utils/database';
 import {getCurrentLocation} from '../utils/location';
 import {colors} from '../theme/colors';
 import {fontSize} from '../theme/styles';
+import Logger from '../utils/logger';
 
 const SORT_OPTIONS = {
   RECENT: 'recent',
@@ -40,7 +41,7 @@ const PolesCapturedScreen = ({navigation}) => {
   const fetchPhotos = async (isRefresh = false) => {
     // Prevent concurrent fetches
     if (refreshing || loadingMore) {
-      console.log('Fetch already in progress, skipping...');
+      Logger.log('Fetch already in progress, skipping...');
       return;
     }
 
@@ -73,7 +74,7 @@ const PolesCapturedScreen = ({navigation}) => {
         setHasMore(poles.length === PAGE_SIZE);
       }
     } catch (error) {
-      console.error('Error fetching photos:', error);
+      Logger.error('Error fetching photos:', error);
     }
   };
 

@@ -1,6 +1,7 @@
 import 'react-native-url-polyfill/auto';
 import {createClient} from '@supabase/supabase-js';
 import {SUPABASE_URL, SUPABASE_ANON_KEY} from '@env';
+import Logger from './logger';
 
 // Initialize Supabase client
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -17,13 +18,13 @@ export const testSupabaseConnection = async () => {
   try {
     const {data, error} = await supabase.from('PolesCaptured').select('count');
     if (error) {
-      console.error('Supabase connection error:', error);
+      Logger.error('Supabase connection error:', error);
       return false;
     }
-    console.log('Supabase connected successfully!');
+    Logger.log('Supabase connected successfully!');
     return true;
   } catch (error) {
-    console.error('Supabase connection failed:', error);
+    Logger.error('Supabase connection failed:', error);
     return false;
   }
 };

@@ -1,4 +1,5 @@
 import RNFS from 'react-native-fs';
+import Logger from './logger';
 
 const PHOTO_DIR = `${RNFS.TemporaryDirectoryPath}/photos`;
 
@@ -12,7 +13,7 @@ export const initPhotoDirectory = async () => {
       await RNFS.mkdir(PHOTO_DIR);
     }
   } catch (error) {
-    console.error('Error initializing photo directory:', error);
+    Logger.error('Error initializing photo directory:', error);
   }
 };
 
@@ -31,7 +32,7 @@ export const savePhoto = async (sourceUri) => {
     await RNFS.moveFile(sourceUri, destPath);
     return destPath;
   } catch (error) {
-    console.error('Error saving photo:', error);
+    Logger.error('Error saving photo:', error);
     throw error;
   }
 };
@@ -53,7 +54,7 @@ export const loadPhotos = async () => {
 
     return photos;
   } catch (error) {
-    console.error('Error loading photos:', error);
+    Logger.error('Error loading photos:', error);
     return [];
   }
 };
@@ -75,7 +76,7 @@ export const getPhotoMetadata = (filepath) => {
       filepath,
     };
   } catch (error) {
-    console.error('Error getting photo metadata:', error);
+    Logger.error('Error getting photo metadata:', error);
     return null;
   }
 };

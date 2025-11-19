@@ -14,6 +14,7 @@ import {
 import {colors} from '../theme/colors';
 import {fontSize, padding} from '../theme/styles';
 import {deletePoleFromDatabase} from '../utils/database';
+import Logger from '../utils/logger';
 
 const PoleDetailScreen = ({route, navigation}) => {
   const {pole} = route.params;
@@ -60,7 +61,7 @@ const PoleDetailScreen = ({route, navigation}) => {
     });
 
     Linking.openURL(url).catch(err => {
-      console.error('Error opening maps:', err);
+      Logger.error('Error opening maps:', err);
       // Fallback to Google Maps web
       Linking.openURL(
         `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`,
@@ -98,7 +99,7 @@ const PoleDetailScreen = ({route, navigation}) => {
                 setDeleting(false);
               }
             } catch (error) {
-              console.error('Error deleting pole:', error);
+              Logger.error('Error deleting pole:', error);
               Alert.alert('Error', 'Failed to delete pole');
               setDeleting(false);
             }

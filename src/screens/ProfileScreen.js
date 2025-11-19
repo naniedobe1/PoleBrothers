@@ -19,6 +19,7 @@ import {
 import {uploadToR2, generateFilename} from '../utils/r2Upload';
 import {colors} from '../theme/colors';
 import {fontSize, padding} from '../theme/styles';
+import Logger from '../utils/logger';
 
 const ProfileScreen = () => {
   const [userData, setUserData] = useState(null);
@@ -38,7 +39,7 @@ const ProfileScreen = () => {
       setUserData(data);
       setTempUsername(data.taker_name || '');
     } catch (error) {
-      console.error('Error loading user data:', error);
+      Logger.error('Error loading user data:', error);
       Alert.alert('Error', 'Failed to load profile data');
     } finally {
       setLoading(false);
@@ -55,12 +56,12 @@ const ProfileScreen = () => {
 
     launchImageLibrary(options, async response => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
+        Logger.log('User cancelled image picker');
         return;
       }
 
       if (response.errorCode) {
-        console.error('ImagePicker Error:', response.errorMessage);
+        Logger.error('ImagePicker Error:', response.errorMessage);
         Alert.alert('Error', 'Failed to select image');
         return;
       }
@@ -71,16 +72,16 @@ const ProfileScreen = () => {
           const asset = response.assets[0];
           const filename = generateFilename();
 
-          console.log('Uploading profile picture...');
+          Logger.log('Uploading profile picture...');
           const r2Url = await uploadToR2(asset.uri, filename);
 
-          console.log('Updating profile picture in database...');
+          Logger.log('Updating profile picture in database...');
           await updateProfilePicture(r2Url);
 
           setUserData(prev => ({...prev, profile_pic_url: r2Url}));
           Alert.alert('Success', 'Profile picture updated!');
         } catch (error) {
-          console.error('Error uploading profile picture:', error);
+          Logger.error('Error uploading profile picture:', error);
           Alert.alert('Error', 'Failed to upload profile picture');
         } finally {
           setUploading(false);
@@ -102,7 +103,7 @@ const ProfileScreen = () => {
       setEditingUsername(false);
       Alert.alert('Success', 'Username updated!');
     } catch (error) {
-      console.error('Error updating username:', error);
+      Logger.error('Error updating username:', error);
       Alert.alert('Error', 'Failed to update username');
     } finally {
       setLoading(false);
