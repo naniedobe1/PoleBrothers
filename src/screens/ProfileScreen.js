@@ -10,16 +10,20 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
+import {launchImageLibrary} from 'react-native-image-picker';
 import {
   fetchOrCreateUserData,
   updateUsername,
+  updateProfilePicture,
 } from '../utils/database';
+import {uploadToR2, generateFilename} from '../utils/r2Upload';
 import {colors} from '../theme/colors';
 import {fontSize, padding} from '../theme/styles';
 
 const ProfileScreen = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [editingUsername, setEditingUsername] = useState(false);
   const [tempUsername, setTempUsername] = useState('');
 
@@ -39,6 +43,50 @@ const ProfileScreen = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChangeProfilePicture = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 0.8,
+      maxWidth: 1024,
+      maxHeight: 1024,
+    };
+
+    launchImageLibrary(options, async response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+        return;
+      }
+
+      if (response.errorCode) {
+        console.error('ImagePicker Error:', response.errorMessage);
+        Alert.alert('Error', 'Failed to select image');
+        return;
+      }
+
+      if (response.assets && response.assets[0]) {
+        try {
+          setUploading(true);
+          const asset = response.assets[0];
+          const filename = generateFilename();
+
+          console.log('Uploading profile picture...');
+          const r2Url = await uploadToR2(asset.uri, filename);
+
+          console.log('Updating profile picture in database...');
+          await updateProfilePicture(r2Url);
+
+          setUserData(prev => ({...prev, profile_pic_url: r2Url}));
+          Alert.alert('Success', 'Profile picture updated!');
+        } catch (error) {
+          console.error('Error uploading profile picture:', error);
+          Alert.alert('Error', 'Failed to upload profile picture');
+        } finally {
+          setUploading(false);
+        }
+      }
+    });
   };
 
   const handleSaveUsername = async () => {
@@ -86,10 +134,20 @@ const ProfileScreen = () => {
         <View style={styles.profilePictureSection}>
           <View style={styles.profilePictureContainer}>
             <Image source={profileImage} style={styles.profilePicture} />
+            {uploading && (
+              <View style={styles.uploadingOverlay}>
+                <ActivityIndicator size="large" color={colors.white} />
+              </View>
+            )}
           </View>
-          <Text style={styles.pictureNote}>
-            Profile picture upload coming soon!
-          </Text>
+          <TouchableOpacity
+            style={styles.changePhotoButton}
+            onPress={handleChangeProfilePicture}
+            disabled={uploading}>
+            <Text style={styles.changePhotoText}>
+              {uploading ? 'Uploading...' : 'Change Profile Picture'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Username Section */}
@@ -172,10 +230,27 @@ const styles = StyleSheet.create({
     borderColor: colors.primary,
     backgroundColor: colors.gray,
   },
-  pictureNote: {
-    fontSize: fontSize.small,
-    color: colors.gray,
-    fontStyle: 'italic',
+  uploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 75,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  changePhotoButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+  },
+  changePhotoText: {
+    fontSize: fontSize.medium,
+    color: colors.white,
+    fontWeight: '600',
   },
   usernameSection: {
     marginBottom: 24,
